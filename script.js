@@ -28,6 +28,7 @@ let currentPlayerIndex = 0;
 let finalRound = false;
 let gameHistory = [];
 let stats = { highestTurn: { score: 0, playerName: '' }, farkleCounts: {} };
+let finalRoundTriggeredBy = null;
 const turnInput = document.getElementById('turn-score-input');
 
 function init() {
@@ -90,15 +91,16 @@ function submitScore() {
         showRecordToast(p.name, val);
     }
 
+    // UPDATED: Track WHO triggered the final round
     if (p.score >= 10000 && !finalRound) {
         finalRound = true;
-        alert(`${p.name} passed 10,000! Final round begins.`);
+        finalRoundTriggeredBy = currentPlayerIndex; 
+        alert(`🎯 ${p.name} set the bar at ${p.score}! Everyone else gets one last turn.`);
     }
 
     turnInput.value = '';
     nextTurn();
 }
-
 function handleFarkle() {
     saveState();
     const p = players[currentPlayerIndex];
@@ -110,10 +112,18 @@ function handleFarkle() {
 
 function nextTurn() {
     currentPlayerIndex++;
+    
+    // Loop back to the first player
     if (currentPlayerIndex >= players.length) {
         currentPlayerIndex = 0;
-        if (finalRound) { endGame(); return; }
     }
+
+    // UPDATED: Check if we have returned to the trigger player
+    if (finalRound && currentPlayerIndex === finalRoundTriggeredBy) {
+        endGame();
+        return;
+    }
+    
     updateUI();
 }
 

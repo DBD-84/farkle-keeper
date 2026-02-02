@@ -182,10 +182,39 @@ function updateUI() {
     document.getElementById('undo-btn').disabled = gameHistory.length === 0;
 }
 
-function saveState() { gameHistory.push(JSON.stringify({ players: JSON.parse(JSON.stringify(players)), currentPlayerIndex, finalRound })); }
-function undo() { if (gameHistory.length > 0) { const last = JSON.parse(gameHistory.pop()); players = last.players; currentPlayerIndex = last.currentPlayerIndex; finalRound = last.finalRound; updateUI(); } }
+function saveState() { 
+    gameHistory.push(JSON.stringify({ 
+        players: JSON.parse(JSON.stringify(players)), 
+        currentPlayerIndex, 
+        finalRound,
+        finalRoundTriggeredBy // Added this
+    })); 
+}
+function undo() { 
+    if (gameHistory.length > 0) { 
+        const last = JSON.parse(gameHistory.pop()); 
+        players = last.players; 
+        currentPlayerIndex = last.currentPlayerIndex; 
+        finalRound = last.finalRound; 
+        finalRoundTriggeredBy = last.finalRoundTriggeredBy; // Added this
+        updateUI(); 
+    } 
+}
 function showRecordToast(name, score) { const t = document.createElement('div'); t.className = 'toast'; t.innerText = `🔥 RECORD: ${name} scored ${score}!`; document.body.appendChild(t); setTimeout(() => t.remove(), 3000); }
 function endGame() { const winner = [...players].sort((a,b) => b.score - a.score)[0]; document.getElementById('win-modal').classList.remove('hidden'); document.getElementById('winner-text').innerHTML = `<h3>${winner.name} Wins!</h3><p>Score: ${winner.score}</p>`; }
-function handleRematch() { players.forEach(p => { p.score = 0; p.turnScores = []; p.onBoard = false; }); currentPlayerIndex = 0; finalRound = false; document.getElementById('win-modal').classList.add('hidden'); updateUI(); }
+// 3. Update handleRematch to reset everything for a new game
+function handleRematch() { 
+    players.forEach(p => { 
+        p.score = 0; 
+        p.turnScores = []; 
+        p.onBoard = false; 
+    }); 
+    currentPlayerIndex = 0; 
+    finalRound = false; 
+    finalRoundTriggeredBy = null; // Added this
+    gameHistory = []; // Clear history on rematch
+    document.getElementById('win-modal').classList.add('hidden'); 
+    updateUI(); 
+}
 
 init();
